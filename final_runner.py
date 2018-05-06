@@ -242,7 +242,7 @@ def train_model(args):
 
 def create_parser():
     parser = argparse.ArgumentParser(description='HW3P3')
-    parser.add_argument('--save_directory', type=str, default='output/inferno/train1_hop',
+    parser.add_argument('--save_directory', type=str, default='output/inferno/train2_hop',
                         help='output directory')
     parser.add_argument('--epochs', type=int, default=5, metavar='N',
                         help='number of epochs to train (default: 10)')
@@ -266,9 +266,9 @@ def create_parser():
                         help='input batch size for training (default: 16)')
     parser.add_argument('--data_directory', type=str, default='/home/datasets/Speaker_Recognition/train_wav/VAD_1/mel_hop',
                         help='data directory')
-    parser.add_argument('--encoder', type=str, default='CNN1D',
+    parser.add_argument('--encoder', type=str, default='HW2P2',
                         help='encoder type')
-    parser.add_argument('--decoder', type=str, default='MLP',
+    parser.add_argument('--decoder', type=str, default='None',
                         help='decoder type')
     parser.add_argument('--pooling', type=str, default='mean',
                         help='pooling type')

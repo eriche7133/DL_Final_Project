@@ -4,6 +4,9 @@ import torch.utils.data
 import collections
 import torch.nn as nn
 from torch.autograd import Variable
+import collections
+
+from custom_modules import *
 from LSTM_State0 import LSTM_State0, LSTMCell_State0
 
 
@@ -109,7 +112,19 @@ class FinalModule(nn.Module):
             self.maxpool = nn.MaxPool1d(4, stride=2, padding=2)
             
             # print('Not Implemented')
-                                
+        elif encoder == 'HW2P2':
+            self.conv1 = cust_Conv2d(in_c=1, out_c=96, k_size=3, stride_size=1, pad_size=1)
+            self.conv2 = cust_Conv2d(in_c=96, out_c=96, k_size=3, stride_size=1, pad_size=1)
+            self.conv3 = cust_Conv2d(in_c=96, out_c=96, k_size=3, stride_size=1, pad_size=1)
+            self.conv4 = cust_Conv2d(in_c=96, out_c=192, k_size=3, stride_size=1, pad_size=1)
+            self.conv5 = cust_Conv2d(in_c=192, out_c=192, k_size=3, stride_size=1, pad_size=1)
+            self.conv6 = cust_Conv2d(in_c=192, out_c=speaker_num, k_size=3, stride_size=1, pad_size=1)
+            self.conv7 = cust_Conv2d(in_c=speaker_num, out_c=speaker_num, k_size=3, stride_size=1, pad_size=1)
+            self.conv8 = cust_Conv2d(in_c=speaker_num, out_c=speaker_num, k_size=3, stride_size=1, pad_size=1)
+            self.conv9 = cust_Conv2d(in_c=speaker_num, out_c=speaker_num, k_size=3, stride_size=1, pad_size=1)
+            self.conv10 = cust_Conv2d(in_c=speaker_num, out_c=speaker_num, k_size=3, stride_size=1, pad_size=1)
+            self.pool1 = cust_Pool_nomask('mean')
+
         ## Decoder
         if decoder == 'linear':
             self.linear = nn.Linear(in_features=hidden_dim*2,
@@ -266,6 +281,25 @@ class FinalModule(nn.Module):
             # print(h.size())
             
             # print('Not Implemented')
+        elif self.encoder == 'HW2P2':
+            # Switch from (L,B,C) to (B,L,C)
+            h = torch.transpose(h,0,1)
+            # Turn (B,L,C) data into (B,1,L,C) data
+            h = torch.unsqueeze(h,1)
+            # print(h.size())
+            h = self.conv1(h)
+            h = self.conv2(h)
+            h = self.conv3(h)
+            h = self.conv4(h)
+            h = self.conv5(h)
+            h = self.conv6(h)
+            h = self.conv7(h)
+            h = self.conv8(h)
+            h = self.conv9(h)
+            h = self.conv10(h)
+            h = self.pool1(h)
+
+            # print(h.size())
         
         # h = self.projection(h) + 1
         
@@ -387,7 +421,7 @@ class cust_Pool(nn.Module):
         self.type = type
         self.batch_first = batch_first
 
-    def forward(self, x, mask,lengths):
+    def forward(self, x, mask, lengths):
         #(x, mask) = split_data(input_val)
         #print(x.shape)
         #print(mask.shape)
@@ -410,6 +444,43 @@ class cust_Pool(nn.Module):
             # print(sum_val.size())
             # print(lengths.size())
             return sum_val/lengths.float().unsqueeze(1)
+        elif self.type == 'logsumexp':
+            return torch.log(torch.sum(torch.exp(x), pool_dim))
+
+
+class cust_Pool_nomask(nn.Module):
+    """
+    Simple custom Pooling layer that transforms a NxCxF phoneme into a Nx1xF output
+    """
+    def __init__(self,type,batch_first=False):
+        super().__init__()
+        self.type = type
+        self.batch_first = batch_first
+
+    def forward(self, x):
+        #(x, mask) = split_data(input_val)
+        #print(x.shape)
+        #print(mask.shape)
+        # print(x.size())
+        # print(mask.size())
+        #print(x.shape)
+        return self.pooling_fn(x)
+    
+    def pooling_fn(self, x):
+        if self.batch_first:
+            pool_dim = 1
+        else:
+            pool_dim = 0
+        if self.type == 'max':
+            h = torch.max(x, pool_dim)[0]
+            return h
+        elif self.type == 'mean':
+            l = x.size()[3]
+            w = x.size()[2]
+            sum_val = torch.sum(torch.sum(x, 3),2)
+            # print(sum_val.size())
+            # print(lengths.size())
+            return sum_val/l/w
         elif self.type == 'logsumexp':
             return torch.log(torch.sum(torch.exp(x), pool_dim))
 
