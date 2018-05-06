@@ -1,0 +1,111 @@
+N+2P
+K
+S
+
+(N+2P)/S
+
+
+
+N=16
+P=2
+S=2
+K=2
+
+
+N=5
+P=1
+S=2
+K=3
+
+5+2-3=4
+4/2=2
+5+2*1=7
+7/2=
+
+6+2=8
+8-K+1=6
+6/2=3
+7-2=5
+5/2=3
+
+7-3=4
+(N+2*P-K)/S+1
+8-3=5
+5/2=2
+2+1=3
+
+0,2,4
+
+3,5,7
+
+0,1,2,3,4,5,6
+0,2,4,6
+3,5,7,9
+
+
+
+(N+2*P-K)/S+1
+
+feed in data 
+
+
+256x4 -> 129x3
+
+10x10 -> 6x6
+
+256x20 -> 129x11
+
+
+
+how to use attention-style things on CNN, or LSTM
+
+
+main idea: not all inputs are equally valuable
+
+encoder:
+LSTM output: L,B,D
+key, value: L,B,D
+
+decoder:
+LSTM:
+query: 1,B,D
+CNN1D: B,1,D
+
+
+
+nout = floor((nin+2p-k)/s)+1
+
+jout = jin*s
+
+rout = rin + (k-1)*jin
+
+startout = startin + ((k-1)/2 - p)*jin
+
+
+conv:
+k = 3
+s = 1
+p = 1
+
+nout = floor((nin+2-3)/1)+1=nin
+jout = jin*1 = jout
+rout = rin + (k-1)*jin = rin + 2*jin
+
+maxpool:
+k = 4
+s = 2
+p = 2
+
+nout = floor((nin+4-4)/2)+1=floor(nin/2)+1
+jout = jin*2
+rout = rin + 3*jin
+
+
+layer 1
+n=image size
+r=1
+j=1
+
+conv1
+jout = 1
+rout = 
